@@ -1,0 +1,12 @@
+Source: artist-sdk
+Section: non-free/devel
+Priority: optional
+Maintainer: Parthipan Ramesh <parthipan.ramesh@cispa.saarland>
+Build-Depends: debhelper (>= 9)
+Standards-Version: 3.9.8
+
+Package: artist-sdk
+Architecture: amd64
+Depends: make, libncurses5 ${misc:Depends}
+Description: ARTist SDK for android instrumentation using ARTist
+ ARTist is a flexible app instrumentation system for security researchers and developers based on the Android Runtime’s dex2oat on-device compiler. Its capabilities range from (policy-driven) arbitrary code injection to inline reference monitoring, trace-logging and code-stripping. In general, ARTist can arbitrarily modify an application’s java code. In contrast to existing byte-code-rewriting approaches, applying the instrumentation during compilation ensures to keep the original apk file untouched, solving a well-known problem of many existing systems. By leaving the unmodified apk file in place, Android’s same origin model that allows for seamless app updates stays intact. This SDK allows developers to build modules for ARTist.
