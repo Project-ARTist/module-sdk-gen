@@ -1,3 +1,6 @@
-/src/include
-/src/toolchain
-/releases
+debian/*
+!debian/debian
+src/include
+src/toolchain
+releases/
+

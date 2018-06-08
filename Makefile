@@ -3,6 +3,10 @@ VERSION = 0.0.1
 OUTPUT_FILE_NAME = $(NAME)-$(VERSION)
 COMMON_FILES = include toolchain makefiles
 
+.PHONY: fetch
+fetch:
+	cd src && ./fetch.sh
+
 .PHONY: zip
 zip:
 	cd src && zip -r "../releases/$(OUTPUT_FILE_NAME).zip" $(COMMON_FILES)  install.sh
@@ -18,10 +22,11 @@ rpm:
 
 .PHONY: deb
 deb:
+	cd debian/ && rm -r $(OUTPUT_FILE_NAME) $(NAME)_$(VERSION).orig.tar.gz *.buildinfo *.changes  *.debian.tar.xz  *.dsc 2>/dev/null || true
 	mkdir debian/$(OUTPUT_FILE_NAME)
 	cd src && cp -r $(COMMON_FILES) Makefile ../debian/$(OUTPUT_FILE_NAME)/
 	cd debian && tar -zcf $(NAME)_$(VERSION).orig.tar.gz $(OUTPUT_FILE_NAME)
 	cp -r debian/debian debian/$(OUTPUT_FILE_NAME)/
 	cd debian/$(OUTPUT_FILE_NAME) && dpkg-buildpackage -us -uc
 	mv debian/*.deb releases/
-	cd debian && rm -r $(OUTPUT_FILE_NAME) $(NAME)_$(VERSION).orig.tar.gz *.buildinfo *.changes  *.debian.tar.xz  *.dsc
+	
