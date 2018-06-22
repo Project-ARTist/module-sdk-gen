@@ -9,7 +9,7 @@ fetch:
 
 .PHONY: zip
 zip:
-	cd src && zip -r "../releases/$(OUTPUT_FILE_NAME).zip" $(COMMON_FILES)  install.sh
+	mkdir -p releases && cd src && zip -r "../releases/$(OUTPUT_FILE_NAME).zip" $(COMMON_FILES)  install.sh
 
 .PHONY: rpm
 rpm:
