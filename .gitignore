@@ -3,4 +3,5 @@ debian/*
 src/include
 src/toolchain
 releases/
-
+.idea
+github
