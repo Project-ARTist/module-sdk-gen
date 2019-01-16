@@ -14,6 +14,12 @@ if [ -z ${ssh_identity+x} ] ||  [ -z ${aosp_root_path+x} ]; then
 fi
 
 
+if [ -z ${archs} ]; then
+    echo "archs not set, defaulting to arm"
+    archs=(arm)
+fi
+
+
 include_folders=(
 	"art/compiler/"
 	"external/libcxx/include"
@@ -107,10 +113,21 @@ for i in ${include_headers[@]}; do
 	rsync -aSzR $ssh_identity:$aosp_root_path/./$i include/
 done
 
-build_toolchain_dirs=(	
+build_toolchain_dirs=(
 	"prebuilts/clang/host/linux-x86/clang-2690385"
-	"prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9"
 )
+i=1
+
+for arch in ${archs[@]}; do
+    if [ "$arch" == "arm" ]; then
+        build_toolchain_dirs[i]="prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9"
+        let i=i+1
+    fi
+    if [ "$arch" == "x86" ]; then
+        build_toolchain_dirs[i]="prebuilts/gcc/linux-x86/x86/x86_64-linux-android-4.9"
+        let i=i+1
+    fi
+done
 
 for i in ${build_toolchain_dirs[@]}; do
 	echo "Fetching $i"
@@ -118,27 +135,48 @@ for i in ${build_toolchain_dirs[@]}; do
 	rsync -a $ssh_identity:$aosp_root_path/$i/ toolchain/$i/
 done
 
+out_prefix="out/target/product/"
+
 libs=(
-	"out/target/product/generic/obj/lib/crtbegin_so.o"
-	"out/target/product/generic/obj/lib/crtend_so.o"
-	"out/target/product/generic/obj/lib/libart.so"
-	"out/target/product/generic/obj/lib/liblz4.so"
-	"out/target/product/generic/obj/lib/liblzma.so"
-	"out/target/product/generic/obj/lib/libvixl.so"
-	"out/target/product/generic/obj/lib/libcutils.so"
-	"out/target/product/generic/obj/lib/libc++.so"
-	"out/target/product/generic/obj/lib/libdl.so"
-	"out/target/product/generic/obj/lib/libc.so"
-	"out/target/product/generic/obj/lib/libm.so"
-	"out/target/product/generic/obj/lib/libart-compiler.so"
-	"out/target/product/generic/obj/STATIC_LIBRARIES/libunwind_llvm_intermediates/libunwind_llvm.a"
-	"out/target/product/generic/obj/STATIC_LIBRARIES/libcompiler_rt-extras_intermediates/libcompiler_rt-extras.a"
+	"/obj/lib/crtbegin_so.o"
+	"/obj/lib/crtend_so.o"
+	"/obj/lib/libart.so"
+	"/obj/lib/liblz4.so"
+	"/obj/lib/liblzma.so"
+	"/obj/lib/libvixl.so"
+	"/obj/lib/libcutils.so"
+	"/obj/lib/libc++.so"
+	"/obj/lib/libdl.so"
+	"/obj/lib/libc.so"
+	"/obj/lib/libm.so"
+	"/obj/lib/libart-compiler.so"
+	"/obj/STATIC_LIBRARIES/libcompiler_rt-extras_intermediates/libcompiler_rt-extras.a"
 )
 
-mkdir -p toolchain/out/target/product/generic/obj/lib
-mkdir -p toolchain/out/target/product/generic/obj/STATIC_LIBRARIES/libunwind_llvm_intermediates
-mkdir -p toolchain/out/target/product/generic/obj/STATIC_LIBRARIES/libcompiler_rt-extras_intermediates
-for i in ${libs[@]}; do
-	echo "Fetching $i"
-	rsync -a $ssh_identity:$aosp_root_path/$i toolchain/$i
+libs_arm=(
+	"/obj/STATIC_LIBRARIES/libunwind_llvm_intermediates/libunwind_llvm.a"
+)
+
+
+
+for arch in ${archs[@]}; do
+    target="generic"
+    if [ "$arch" == "arm" ]; then
+	merged_libs=("${libs[@]}" "${libs_arm[@]}")
+        mkdir -p toolchain/out/target/product/$target/obj/STATIC_LIBRARIES/libunwind_llvm_intermediates
+    elif [ "$arch" == "x86" ]; then
+        target=$target"_x86"
+	merged_libs=("${libs[@]}")
+    fi
+
+    mkdir -p toolchain/out/target/product/$target/obj/lib
+    mkdir -p toolchain/out/target/product/$target/obj/STATIC_LIBRARIES/libcompiler_rt-extras_intermediates
+
+    for lib in ${merged_libs[@]}; do
+        lib=$out_prefix$target$lib
+        echo "Fetching $lib"
+        rsync -a $ssh_identity:$aosp_root_path/$lib toolchain/$lib
+    done
+
 done
+
