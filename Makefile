@@ -13,6 +13,7 @@ zip:
 
 .PHONY: rpm
 rpm:
+	mkdir -p releases
 	mkdir -p rpmbuild/SOURCES/$(OUTPUT_FILE_NAME)
 	cd src && cp -r $(COMMON_FILES) LICENSE Makefile ../rpmbuild/SOURCES/$(OUTPUT_FILE_NAME)/
 	cd rpmbuild/SOURCES && tar -zcf $(OUTPUT_FILE_NAME).tar.gz $(OUTPUT_FILE_NAME) && rm -r $(OUTPUT_FILE_NAME)
@@ -22,6 +23,7 @@ rpm:
 
 .PHONY: deb
 deb:
+	mkdir -p releases 
 	cd debian/ && rm -r $(OUTPUT_FILE_NAME) $(NAME)_$(VERSION).orig.tar.gz *.buildinfo *.changes  *.debian.tar.xz  *.dsc 2>/dev/null || true
 	mkdir debian/$(OUTPUT_FILE_NAME)
 	cd src && cp -r $(COMMON_FILES) Makefile ../debian/$(OUTPUT_FILE_NAME)/
