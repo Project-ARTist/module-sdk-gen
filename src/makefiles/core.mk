@@ -12,17 +12,39 @@ CODELIB = $(wildcard codelib.apk)
 # ANDROID_VERSION can be BUILD_MARSHMALLOW, BUILD_NOUGAT or BUILD_OREO
 ANDROID_VERSION = BUILD_NOUGAT
 
+define output
+      @echo $1
+endef
+
+define colored 
+      @tput setaf $2 
+      $(call output,$1)
+      @tput sgr0
+endef
+
+define success
+      $(call colored,$1,2)
+endef
+
+
+.PHONY: all
+all: arm x86
+
+
 .PHONY: arm
 arm: $(OUT_ARM)/artist-module.so Manifest.json
 	mkdir -p out/zip
 	cp -r Manifest.json $(CODELIB) out/lib out/zip/
 	cd out/zip && zip -r ../artist-module-arm.zip Manifest.json $(CODELIB) lib
+	$(call success,"Successfully built module for arm ($(ANDROID_VERSION)).")
 
 .PHONY: x86
 x86: $(OUT_X86)/artist-module.so Manifest.json
 	mkdir -p out/zip
 	cp -r Manifest.json $(CODELIB) out/lib out/zip/
 	cd out/zip && zip -r ../artist-module-x86.zip Manifest.json $(CODELIB) lib
+	$(call success,"Successfully built module for x86 ($(ANDROID_VERSION)).")
+
 
 
 out/lib/armeabi-v7a/artist-module.so: $(OBJECTS_ARM)
@@ -136,3 +158,6 @@ out/obj/x86/%.o: src/%.cc
 .PHONY: clean
 clean:
 	rm -r out
+
+
+.DEFAULT_GOAL := all

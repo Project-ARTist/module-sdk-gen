@@ -29,4 +29,8 @@ deb:
 	cp -r debian/debian debian/$(OUTPUT_FILE_NAME)/
 	cd debian/$(OUTPUT_FILE_NAME) && dpkg-buildpackage -us -uc
 	mv debian/*.deb releases/
+
+.PHONY: clean
+clean:
+	rm -rf releases/*
 	
